@@ -54,9 +54,8 @@ defaults = Config { width  = 300
                   , lineC  = "blue"
                   }
                   
-
-render :: Config -> [(Int, Int, Int, Int)] -> S.Svg
-render config walls = S.docTypeSvg ! A.version "1.1" 
+render :: [(Int, Int, Int, Int)] -> Config -> S.Svg
+render walls config = S.docTypeSvg ! A.version "1.1" 
                                ! A.width "300"
                                ! A.height "300"
                                ! A.viewbox "-10 -10 320 320"
@@ -65,33 +64,39 @@ render config walls = S.docTypeSvg ! A.version "1.1"
                                  interior walls config
                           
                              
-line :: Config -> Int -> Int -> Int -> Int -> S.Svg 
-line config x1 y1 x2 y2 = S.line ! A.x1 (S.toValue x1)
-                                 ! A.y1 (S.toValue y1)
-                                 ! A.x2 (S.toValue x2)
-                                 ! A.y2 (S.toValue y2)
-                                 ! A.strokeWidth (S.toValue (lineW config))
-                                 ! A.stroke (S.toValue (lineC config))
+line :: Int -> Int -> Int -> Int -> Config -> S.Svg 
+line  x1 y1 x2 y2  = do
+  lW <- lineW
+  lC <- lineC
+  return $ S.line ! A.x1 (S.toValue x1)
+                  ! A.y1 (S.toValue y1)
+                  ! A.x2 (S.toValue x2)
+                  ! A.y2 (S.toValue y2)
+                  ! A.strokeWidth (S.toValue lW)
+                  ! A.stroke (S.toValue lC)
                                  
 exterior :: Config -> S.Svg
-exterior config = S.g $ do
-  line config 0 0 w 0 
-  line config 0 0 0 h 
-  line config w 0 w h 
-  line config 0 h w h 
-  where w = width config
-        h = height config
+exterior = do
+  w <- asks width
+  h <- asks height
+  l1 <- line 0 0 w 0
+  l2 <- line 0 0 0 h
+  l3 <- line w 0 w h 
+  l4 <- line 0 h w h
+  return $ S.g $ do
+    l1
+    l2
+    l3
+    l4
         
 interior :: [(Int, Int, Int, Int)] -> Config -> S.Svg
-interior walls config = forM_ walls $ \(x, y, x', y') -> 
-  wall2svg config x y x' y' 
+interior walls = do 
+  svgs <- traverse wall2svg walls
+  return $ sequence_ svgs
   
-wall2svg :: Config -> Int -> Int -> Int -> Int -> S.Svg
-wall2svg config x y x' y' = line config x1 y1 x2 y2 
-                       where x1 = x * w
-                             y1 = y * w
-                             x2 = x' * w
-                             y2 = y' * w
-                             w = wall config
+wall2svg :: (Int, Int, Int, Int) -> Config -> S.Svg
+wall2svg (x, y, x', y') = do
+  w <- wall
+  line (x*w) (y*w) (x'*w) (y'*w)
                              
                              
