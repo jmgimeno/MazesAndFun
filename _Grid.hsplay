@@ -1,0 +1,8 @@
+-- Haskell Playground 1.0
+n2xy 6 16
+xy2n 6 (4, 2)
+let g = gridNE 6 6
+
+Graph.edges g
+map Graph.edgeLabel $ Graph.labEdges g
+
