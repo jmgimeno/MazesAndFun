@@ -3,7 +3,6 @@
 module SVG where
  
 import Control.Monad
-import Control.Monad.Reader
 
 import Text.Blaze.Svg11 ((!), mkPath, rotate, l, m)
 import qualified Text.Blaze.Svg11 as S
@@ -11,60 +10,49 @@ import qualified Text.Blaze.Svg11.Attributes as A
 
 import Grid
 
-diagram1 :: S.Svg
-diagram1 = S.docTypeSvg ! A.version "1.1" ! A.width "100" ! A.height "100" $
-  S.circle ! A.cx "50" ! A.cy "50" ! A.r "40" ! A.stroke "green"
-           ! A.strokeWidth "4" ! A.fill "yellow"
-
-diagram2 :: S.Svg
-diagram2 = S.docTypeSvg ! A.version "1.1" ! A.width "100" ! A.height "100" $ S.g $ do
-  S.line ! A.x1 "50" ! A.y1 "50" ! A.x2 "90" !  A.y2 "90" ! A.stroke "green"
-           ! A.strokeWidth "4"
-  S.line ! A.x1 "50" ! A.y1 "90" ! A.x2 "90" !  A.y2 "50" ! A.stroke "blue"
-           ! A.strokeWidth "4"
-
-diagram3 :: S.Svg
-diagram3 = S.docTypeSvg ! A.version "1.1" ! A.width "150" ! A.height "100" ! A.viewbox "0 0 3 2" $ do
-    S.g ! A.transform makeTransform $ do
-      S.rect ! A.width "1" ! A.height "2" ! A.fill "#008d46"
-      S.rect ! A.width "1" ! A.height "2" ! A.fill "#ffffff"
-      S.rect ! A.width "1" ! A.height "2" ! A.fill "#d2232c"
-      S.path ! A.d makePath
-           
-makePath :: S.AttributeValue
-makePath = mkPath $ do
-  l 2 3
-  m 4 5
-
-makeTransform :: S.AttributeValue
-makeTransform = rotate 50
-
-
-data Config = Config { width  :: Int
-                     , height :: Int
-                     , wall   :: Int
-                     , lineW  :: Int
-                     , lineC  :: String                     }
+data Config = Config { width   :: Int
+                     , height  :: Int
+                     , padding :: Int
+                     , wall    :: Float
+                     , lineW   :: Int
+                     , lineC   :: String 
+                     }
                      
 defaults :: Config
-defaults = Config { width  = 300
-                  , height = 300
-                  , wall   = 50
-                  , lineW  = 2
-                  , lineC  = "blue"
+defaults = Config { width   = 300
+                  , height  = 300
+                  , padding = 10
+                  , wall    = 50.0
+                  , lineW   = 2
+                  , lineC   = "blue"
                   }
                   
 render :: [(Int, Int, Int, Int)] -> Config -> S.Svg
-render walls config = S.docTypeSvg ! A.version "1.1" 
-                               ! A.width "300"
-                               ! A.height "300"
-                               ! A.viewbox "-10 -10 320 320"
-                               $ S.g $ do
-                                 exterior config
-                                 interior walls config
-                          
-                             
-line :: Int -> Int -> Int -> Int -> Config -> S.Svg 
+render walls = do
+  svg <- mkSvg
+  ext <- exterior
+  int <- interior walls
+  return $ svg $ do {ext; int}
+
+mkSvg :: Config -> S.Svg -> S.Svg
+mkSvg = do
+  w <- width
+  h <- height
+  vB <- mkViewBox
+  return $  S.docTypeSvg ! A.version "1.1" 
+                         ! A.width (S.toValue w)
+                         ! A.height (S.toValue h)
+                         ! A.viewbox (S.toValue vB)    
+
+mkViewBox :: Config -> String
+mkViewBox = do
+  w <- width
+  h <- height
+  p <- padding
+  return $ show (-p) ++ " " ++ show (-p) ++ " " 
+                     ++ show (w + 2*p) ++ " " ++ show (h + 2*p)
+                                  
+line :: Float -> Float -> Float -> Float -> Config -> S.Svg 
 line  x1 y1 x2 y2  = do
   lW <- lineW
   lC <- lineC
@@ -77,26 +65,23 @@ line  x1 y1 x2 y2  = do
                                  
 exterior :: Config -> S.Svg
 exterior = do
-  w <- asks width
-  h <- asks height
-  l1 <- line 0 0 w 0
-  l2 <- line 0 0 0 h
-  l3 <- line w 0 w h 
-  l4 <- line 0 h w h
-  return $ S.g $ do
-    l1
-    l2
-    l3
-    l4
+  w <- fromIntegral . width
+  h <- fromIntegral . height
+  top    <- line 0 0 w 0
+  right  <- line w 0 w h 
+  bottom <- line 0 h w h
+  left   <- line 0 0 0 h
+  return $ sequence_ [top,right,bottom,left]
         
 interior :: [(Int, Int, Int, Int)] -> Config -> S.Svg
 interior walls = do 
   svgs <- traverse wall2svg walls
   return $ sequence_ svgs
-  
-wall2svg :: (Int, Int, Int, Int) -> Config -> S.Svg
-wall2svg (x, y, x', y') = do
-  w <- wall
-  line (x*w) (y*w) (x'*w) (y'*w)
+  where wall2svg (x, y, x', y') = do
+          w <- wall
+          line (fromIntegral x  * w) 
+               (fromIntegral y  * w) 
+               (fromIntegral x' * w) 
+               (fromIntegral y' * w)
                              
                              

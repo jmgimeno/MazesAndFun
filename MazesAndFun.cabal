@@ -13,9 +13,10 @@ Executable MazesAndFun
   buildable: True
   build-depends:
       base -any,
+      blaze-markup -any,
       fgl -any,
       blaze-svg -any,
-      mtl -any
+      bytestring -any
   other-modules:
       SVG
       Grid

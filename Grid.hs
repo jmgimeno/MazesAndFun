@@ -2,7 +2,8 @@ module Grid where
   
 import qualified Data.Graph.Inductive as Graph
 
-type Grid = Graph.Gr () (Int, Int, Int, Int)
+type Wall = (Int, Int, Int, Int)
+type Grid = Graph.Gr () Wall
 
 gridNE :: Int -> Int -> Grid
 gridNE width height = Graph.mkGraph nodes edges
@@ -38,3 +39,6 @@ n2xy w n = (n2x w n, n2y w n)
 
 xy2n :: Int -> (Int, Int) -> Int
 xy2n w (x, y) = w * y + x
+
+walls :: Grid -> [Wall]
+walls = map Graph.edgeLabel . Graph.labEdges
