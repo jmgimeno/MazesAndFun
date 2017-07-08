@@ -1,5 +1,8 @@
 -- Haskell Playground 1.0
-g = gridNE 6 6
-w = walls g
+g = gridNE 20 20
+matchAny g
+gen <- getStdGen
+(nw, _) = binTree g gen
+w = walls g \\ nw 
 svg = render w
 svg defaults

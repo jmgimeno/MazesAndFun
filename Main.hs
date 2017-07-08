@@ -1,15 +1,30 @@
 module Main where
 
+import BT
 import Grid
 import SVG
 
-import qualified Data.ByteString as BS
-import Text.Blaze.Renderer.Utf8 (renderMarkupToByteStringIO)
-
+import Data.Graph.Inductive
+import Data.List
+import System.Random
+import Text.Blaze.Svg.Renderer.String (renderSvg)
+                 
+defaults :: Config
+defaults = Config { width   = 400  -- Hardcoded 20x20
+                  , height  = 400
+                  , padding = 10
+                  , wall    = 10.0
+                  , lineW   = 1
+                  , lineC   = "blue"
+                  }
+                  
 main :: IO ()
 main = do
-  let g = gridNE 6 6
-  let w = walls g
+  let g = gridNE 40 40
+  gen <- getStdGen
+  let (nw, _) = binTree g gen
+  let w = walls g \\ nw
   let svg = render w
-  renderMarkupToByteStringIO (BS.writeFile "grid.svg") (svg defaults)
+  let str = renderSvg $ svg defaults
+  writeFile "grid.svg" str
   

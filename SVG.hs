@@ -3,7 +3,6 @@
 module SVG where
  
 import Control.Monad
-
 import Text.Blaze.Svg11 ((!), mkPath, rotate, l, m)
 import qualified Text.Blaze.Svg11 as S
 import qualified Text.Blaze.Svg11.Attributes as A
@@ -17,15 +16,6 @@ data Config = Config { width   :: Int
                      , lineW   :: Int
                      , lineC   :: String 
                      }
-                     
-defaults :: Config
-defaults = Config { width   = 300
-                  , height  = 300
-                  , padding = 10
-                  , wall    = 50.0
-                  , lineW   = 2
-                  , lineC   = "blue"
-                  }
                   
 render :: [(Int, Int, Int, Int)] -> Config -> S.Svg
 render walls = do
