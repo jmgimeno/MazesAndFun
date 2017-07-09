@@ -12,12 +12,12 @@ gridNE width height = Graph.mkGraph nodes edges
                            let n = xy2n' (x, y)] 
         edges = horizontal ++ vertical
         horizontal = [(n', n, (x, y', x+1, y')) 
-                   | (n,  _) <- nodes,
-                     (n', _) <- nodes,
-                     let (x, y) = n2xy' n,
-                     let (x', y') = n2xy' n',
-                     x == x',
-                     y + 1 == y']
+                     | (n,  _) <- nodes,
+                       (n', _) <- nodes,
+                       let (x, y) = n2xy' n,
+                       let (x', y') = n2xy' n',
+                       x == x',
+                       y + 1 == y']
         vertical = [(n, n', (x', y, x', y+1)) 
                      | (n,  _) <- nodes,
                        (n', _) <- nodes,
@@ -40,5 +40,5 @@ n2xy w n = (n2x w n, n2y w n)
 xy2n :: Int -> (Int, Int) -> Int
 xy2n w (x, y) = w * y + x
 
-walls :: Grid -> [Wall]
-walls = map Graph.edgeLabel . Graph.labEdges
+getWalls :: Grid -> [Wall]
+getWalls = map Graph.edgeLabel . Graph.labEdges

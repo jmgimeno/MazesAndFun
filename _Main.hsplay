@@ -1,8 +1,19 @@
 -- Haskell Playground 1.0
+defaults' = Config { width   = 400                    
+                   , height  = 400
+                   , padding = 10
+                   , wall    = 20.0
+                   , lineW   = 1
+                   , lineC   = "blue"
+                   }
+
 g = gridNE 20 20
 matchAny g
 gen <- getStdGen
-(nw, _) = binTree g gen
-w = walls g \\ nw 
+--(nw, _) = binTree g gen
+nw = evalState (binTree g) gen
+nw
+w = getWalls g \\ nw 
+w
 svg = render w
-svg defaults
+svg defaults'

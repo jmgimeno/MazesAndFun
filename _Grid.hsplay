@@ -4,3 +4,5 @@ xy2n 6 (4, 2)
 let g = gridNE 6 6
 map Graph.edgeLabel $ Graph.labEdges g
 
+
+Graph.nodes g

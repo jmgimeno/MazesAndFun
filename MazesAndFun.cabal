@@ -14,8 +14,9 @@ Executable MazesAndFun
   build-depends:
       base -any,
       fgl -any,
-      blaze-svg -any,
-      random -any
+      mtl -any,
+      random -any,
+      blaze-svg -any
   other-modules:
       Grid
       BT

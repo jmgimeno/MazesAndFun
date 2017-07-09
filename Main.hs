@@ -4,6 +4,7 @@ import BT
 import Grid
 import SVG
 
+import Control.Monad.State
 import Data.Graph.Inductive
 import Data.List
 import System.Random
@@ -20,11 +21,11 @@ defaults = Config { width   = 400  -- Hardcoded 20x20
                   
 main :: IO ()
 main = do
-  let g = gridNE 40 40
+  let grid = gridNE 40 40
   gen <- getStdGen
-  let (nw, _) = binTree g gen
-  let w = walls g \\ nw
-  let svg = render w
+  let unWalls = evalState (binTree grid) gen
+  let walls = getWalls grid \\ unWalls
+  let svg = render walls
   let str = renderSvg $ svg defaults
-  writeFile "grid.svg" str
+  writeFile "maze.svg" str
   
