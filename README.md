@@ -13,5 +13,5 @@ and executable with
 
 The generated maze is in file "maze.svg", its image size is 600 by 600 and it has 50 rows and columns.
 
-![Generated maze](./maze.svg)
+![Generated maze](https://github.com/jmgimeno/MazesAndFun/blob/master/maze.svg)
 
