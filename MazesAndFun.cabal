@@ -6,6 +6,8 @@ license: AllRightsReserved
 stability: experimental
 synopsis: Makeing mazes with functional programming
 author: Juan Manuel Gimeno Illa
+extra-source-files:
+    README.md
 x-ghc-framework-version: 8.0.2-8.9-3
 x-last-ide-version: HfM1.5.0
 Executable MazesAndFun

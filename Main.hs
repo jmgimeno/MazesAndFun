@@ -7,25 +7,30 @@ import SVG
 import Control.Monad.State
 import Data.Graph.Inductive
 import Data.List
+import System.Environment
 import System.Random
 import Text.Blaze.Svg.Renderer.String (renderSvg)
-                 
-defaults :: Config
-defaults = Config { width   = 400  -- Hardcoded 20x20
-                  , height  = 400
-                  , padding = 10
-                  , wall    = 10.0
-                  , lineW   = 1
-                  , lineC   = "blue"
-                  }
-                  
+                          
+makeDefaults :: Int -> Int -> Config
+makeDefaults imageSize mazeSize = Config { width = imageSize
+                                         , height = imageSize
+                                         , padding = 10
+                                         , wall = fromIntegral imageSize / fromIntegral mazeSize
+                                         , lineW = 1
+                                         , lineC = "blue"
+                                         }
+                                       
+mazeToFile :: String -> Int -> Int -> IO ()
+mazeToFile fname imageSize mazeSize = do
+  let grid = gridNE mazeSize mazeSize
+  gen <- getStdGen
+  let removedWalls = evalState (binTree grid) gen
+  let mazeWalls = getWalls grid \\ removedWalls
+  let svg = render mazeWalls
+  let defaults = makeDefaults imageSize mazeSize
+  writeFile fname $ renderSvg $ svg defaults
+  
 main :: IO ()
 main = do
-  let grid = gridNE 40 40
-  gen <- getStdGen
-  let unWalls = evalState (binTree grid) gen
-  let walls = getWalls grid \\ unWalls
-  let svg = render walls
-  let str = renderSvg $ svg defaults
-  writeFile "maze.svg" str
-  
+  [fname, imageSize, mazeSize] <- getArgs
+  mazeToFile fname (read imageSize) (read mazeSize)
